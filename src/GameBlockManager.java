@@ -19,7 +19,7 @@ class SkyBlock extends GameBlock {
 class SoilBlock extends GameBlock {
     SoilBlock(int x, int y, int size) {
         super(x, y, size);
-        ImagePattern soilPattern = new ImagePattern(new Image());
+        ImagePattern soilPattern = new ImagePattern(new Image(Paths.getRandomSoilBlockPath()));
         setFill(soilPattern);
     }
 }

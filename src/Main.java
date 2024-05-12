@@ -33,7 +33,7 @@ public class Main extends Application{
     private void levelBuilder(Pane pane) {
         for (int i = 0; i < COLUMN_COUNT; i++) {
             for (int j = 0; j < ROW_COUNT; j++) {
-                Rectangle rect = GameBlockManager.getSkyBlock(i, j);
+                Rectangle rect = GameBlockManager.getSoilBlock(i, j);
                 pane.getChildren().add(rect);
                 gridBlocks[i][j] = rect;
             }
