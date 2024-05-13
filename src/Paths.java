@@ -1,3 +1,14 @@
+/**
+ * The Paths class contains the file paths of the images and sounds used in the game.
+ * <p>
+ * It provides constants for the paths of various game assets, including soil blocks,
+ * top blocks, obstacle blocks, valuable blocks, lava blocks, drill images, and sound effects.
+ * </p>
+ * <p>
+ * The class also offers utility methods to retrieve random paths for specific types of blocks,
+ * as well as methods to get the paths of specific valuable blocks like amazonite, bronzium, and diamond.
+ * </p>
+ */
 public class Paths {
     // Attribute file path
     public static final String ATTRIBUTE_FILE_PATH = "./assets/atributes_of_valuables.txt";
@@ -54,42 +65,87 @@ public class Paths {
     public static final String CHALLENGE_DONE = "./assets/extras/sound/challenge_complete.wav";
     public static final String CLICK = "./assets/extras/sound/clink.mp3";
 
-    private static String chooseRandomly(String[] paths){
+    /**
+     * Chooses a random path from the given array of paths.
+     *
+     * @param paths The array of paths to choose from.
+     * @return A randomly selected path from the array.
+     */
+    private static String chooseRandomly(String[] paths) {
         int length = paths.length;
         int random = (int) (Math.random() * length);
         return paths[random];
     }
 
+    /**
+     * Returns a random lava block path.
+     *
+     * @return A randomly selected lava block path.
+     */
     public static String getRandomLavaBlockPath() {
         return chooseRandomly(lavaBlockPaths);
     }
 
+    /**
+     * Returns a random soil block path.
+     *
+     * @return A randomly selected soil block path.
+     */
     public static String getRandomSoilBlockPath() {
         return chooseRandomly(SOIL_BLOCK_PATHS);
     }
 
+    /**
+     * Returns a random top block path.
+     *
+     * @return A randomly selected top block path.
+     */
     public static String getRandomTopBlockPath() {
         return chooseRandomly(TOP_BLOCK_PATHS);
     }
 
+    /**
+     * Returns a random obstacle block path.
+     *
+     * @return A randomly selected obstacle block path.
+     */
     public static String getRandomObstacleBlockPath() {
         return chooseRandomly(OBSTACLE_BLOCK_PATHS);
     }
 
+    /**
+     * Returns a random valuable block path.
+     *
+     * @return A randomly selected valuable block path.
+     */
     public static String getRandomValuableBlockPath() {
         return chooseRandomly(VALUABLE_BLOCK_PATHS);
     }
 
+    /**
+     * Returns the path of the amazonite block.
+     *
+     * @return The path of the amazonite block.
+     */
     public static String getAmazonitePath() {
         return AMAZONITE_BLOCK;
     }
 
+    /**
+     * Returns the path of the bronzium block.
+     *
+     * @return The path of the bronzium block.
+     */
     public static String getBronziumPath() {
         return BRONZIUM_BLOCK;
     }
 
+    /**
+     * Returns the path of the diamond block.
+     *
+     * @return The path of the diamond block.
+     */
     public static String getDiamondPath() {
         return DIAMOND_BLOCK;
     }
 }
-

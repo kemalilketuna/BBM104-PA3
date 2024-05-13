@@ -15,6 +15,10 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 
+/*
+ * This class is the main class of the game, responsible for game logic, game loop,
+ * initialization, user input handling, game screen display, and game over condition. 
+*/
 public class Main extends Application{
     // This variable can be changed if game is too easy or too hard
     private final int COLUMN_COUNT = 13;
@@ -46,6 +50,23 @@ public class Main extends Application{
     private Pane pane;
     private Boolean isFlying = false;
 
+    /**
+     * Starts the game by setting up the game window, initializing game elements,
+     * and creating a game loop.
+     *
+     * <p>This method is called when the game starts. It performs the following steps:</p>
+     * <ol>
+     *   <li>Sets up the game window by creating a {@link Pane} and setting its background color and size.</li>
+     *   <li>Initializes game elements such as the game blocks, drill machine, and text displays.</li>
+     *   <li>Creates a game loop using a {@link Timeline} that updates the game state every 0.5 seconds.</li>
+     *   <li>Handles gravity and fuel consumption in each iteration of the game loop.</li>
+     *   <li>Sets up a {@link KeyEvent} listener to process user input for moving the drill machine.</li>
+     *   <li>Sets the title, scene, and other properties of the primary stage.</li>
+     *   <li>Shows the primary stage to display the game window.</li>
+     * </ol>
+     *
+     * @param primaryStage the primary stage of the application
+     */
     @Override
     public void start(Stage primaryStage) {
         stage = primaryStage;
@@ -84,6 +105,11 @@ public class Main extends Application{
         primaryStage.show();
     }
 
+    /*
+     * This method handles the user input and moves the drill machine accordingly.
+     * 
+     * @param event the key event to be processed
+     */
     private void processMove(KeyEvent event){
         if (event.getCode() == KeyCode.UP) fly();
         else if (event.getCode() == KeyCode.DOWN) move(drillX, drillY+1);
@@ -97,6 +123,29 @@ public class Main extends Application{
         }
     }
 
+
+    /**
+     * Moves the drill to the specified position on the grid.
+     *
+     * @param x The x-coordinate of the target position.
+     * @param y The y-coordinate of the target position.
+     *
+     * <p>
+     * The method checks the validity of the target position and performs actions based on the encountered block type:
+     * </p>
+     *
+     * <ul>
+     *   <li>If the block below the drill is a {@link DrilledBlock}, the drill can move to a {@link DrilledBlock} or {@link SkyBlock}.</li>
+     *   <li>If the target block is an {@link ObstacleBlock}, no action is performed.</li>
+     *   <li>If the target block is a {@link LavaBlock}, the game is over.</li>
+     *   <li>If the target block is a {@link ValuableBlock}, collected money and weight are updated.</li>
+     * </ul>
+     *
+     * <p>
+     * The drill position is updated, and the target block is replaced with a {@link DrilledBlock}.
+     * Game texts are updated to reflect the changes.
+     * </p>
+     */
     private void move(int x, int y){
         if (x < 0 || x >= COLUMN_COUNT || y < 0 || y >= ROW_COUNT) {
             return;
@@ -146,6 +195,12 @@ public class Main extends Application{
         }
     }
 
+    /**
+     * Updates the drill's position to the specified coordinates and consumes fuel.
+     *
+     * @param x The new x-coordinate of the drill.
+     * @param y The new y-coordinate of the drill.
+     */
     private void updateDrillPosition(int x, int y){
         useFuel(moveFuelConsumption);
         drillX = x;
@@ -154,6 +209,11 @@ public class Main extends Application{
         drillMachine.setY(drillY * BLOCK_SIZE);
     }
 
+    /**
+     * Consumes fuel and updates the fuel text.
+     *
+     * @param amount The amount of fuel to be consumed.
+     */
     private void useFuel(int amount){
         fuel -= amount;
         if(fuel <= 0){
@@ -163,12 +223,18 @@ public class Main extends Application{
         updateTexts();
     }
 
+    /**
+     * Updates the fuel, collected money, and weight texts.
+     */
     private void updateTexts(){
         fuelText.setText(TextCaptions.getFuelString(fuel));
         collectedMoneyText.setText(TextCaptions.getCollectedMoneyString(collectedMoney));
         weightText.setText(TextCaptions.getWeightString(weight));
     }
 
+    /**
+     * Checks if the drill machine can fly and moves it up if possible.
+     */
     private void fly(){
         if(drillY <= skyRowCount - 1){
             return;
@@ -181,6 +247,9 @@ public class Main extends Application{
         }
     }
 
+    /**
+     * Checks if the drill machine can fall due to gravity and moves it down if possible.
+     */
     private void gravityFall(){
         if (isFlying) {
             return;
@@ -194,11 +263,17 @@ public class Main extends Application{
         }
     }
 
+    /**
+     * Initializes the drill machine and adds it to the game screen.
+     */
     private void initializeDrillMachine(){
         drillMachine = new DrillMachine(drillX, drillY, BLOCK_SIZE);
         pane.getChildren().add(drillMachine);
     }
 
+    /**
+     * Initializes the fuel, collected money, and weight texts and adds them to the game screen.
+     */
     private void initializeTexts(){
         fuelText = new TextElement(TextCaptions.getFuelString(fuel), 20, 20);
         pane.getChildren().add(fuelText);
@@ -210,6 +285,11 @@ public class Main extends Application{
         pane.getChildren().add(weightText);
     }
 
+    /**
+     * Generates random x and y coordinates for placing blocks.
+     *
+     * @return An array containing the x and y coordinates.
+     */
     private int[] getRandomXY(){
         int x = (int) ((Math.random() * (COLUMN_COUNT - 2)) + 1);
         int y = (int) ((Math.random() * (ROW_COUNT - (skyRowCount + 2))) + 3);
@@ -222,6 +302,27 @@ public class Main extends Application{
         return new int[]{x, y};
     }
 
+    /**
+     * Builds the game level by randomly placing blocks on the grid.
+     * 
+     * <p>
+     * The method generates a random number of lava blocks and places them at random positions.
+     * It ensures that at least three different types of valuable blocks (Amazonite, Bronzium, and Diamond)
+     * are present on the grid.
+     * </p>
+     * 
+     * <p>
+     * The remaining blocks are filled based on their row positions:
+     * - Rows above the sky row count are filled with sky blocks.
+     * - The top row is filled with top blocks.
+     * - The bottom row and the leftmost and rightmost columns are filled with obstacle blocks.
+     * - Other positions are filled with either valuable blocks (based on a probability) or soil blocks.
+     * </p>
+     * 
+     * <p>
+     * The generated blocks are added to the `gridBlocks` array and the `pane` for display.
+     * </p>
+     */
     private void levelBuilder() {
         int lava_count = (int) (Math.random() * COLUMN_COUNT) + 1;
         
@@ -274,6 +375,12 @@ public class Main extends Application{
         }
     }
 
+    /**
+     * The main method of the game.
+     * It reads the attributes of the valuable blocks from a file and launches the game.
+     * 
+     * @param args the command line arguments
+     */
     public static void main(String[] args) throws Exception{
         // read attirbutes from file
         File file = new File(Paths.ATTRIBUTE_FILE_PATH);

@@ -10,7 +10,20 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 
+/**
+ * The InfoScreens class provides methods for displaying game over and win screens.
+ * It contains static methods to show a red screen for game over and a green screen for winning the game.
+ * The class also includes a method to create a restart button.
+ */
 public class InfoScreens {
+
+    /*
+     * This method displays a red screen when the game ends.
+     * 
+     * @param primaryStage the stage to display the red screen
+     * @param height the height of the screen
+     * @param width the width of the screen
+     */
     public static void showRedScreen(Stage primaryStage, int height, int width) {
         SoundPlayer.playLavaSound();
         StackPane root = new StackPane();
@@ -31,6 +44,14 @@ public class InfoScreens {
         primaryStage.setScene(scene);
     }
 
+    /*
+     * This method displays a green screen when the game ends.
+     * 
+     * @param primaryStage the stage to display the green screen
+     * @param height the height of the screen
+     * @param width the width of the screen
+     * @param score the score of the player
+     */
     public static void showGreenScreen(Stage primaryStage, int height, int width, int score) {
         SoundPlayer.playChallengeDoneSound();
         StackPane root = new StackPane();
@@ -56,6 +77,12 @@ public class InfoScreens {
         primaryStage.setScene(scene);
     }
 
+    /*
+     * This method creates a restart button.
+     * 
+     * @param primaryStage the stage to display the red screen
+     * @return the created restart button
+     */
     public static Button createRestartButton(Stage primaryStage) {
         Button restartButton = new Button(TextCaptions.RESTART);
         // background color of the button Color.white
