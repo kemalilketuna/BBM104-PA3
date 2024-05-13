@@ -9,13 +9,13 @@
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}"
+            
         },
         {
             "type": "java",
             "name": "Main",
             "request": "launch",
             "mainClass": "Main",
-            "projectName": "BBM104-PA3_dac2723"
         },
     ]
 }

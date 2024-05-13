@@ -35,15 +35,17 @@ public class Main extends Application{
     private int collectedMoney = 0;
     private int weight = 0;
 
-    private int idleFuelConsumption = 1;
+    private int idleFuelConsumption = 3;
+    private int moveFuelConsumption = 10;
 
-    private Rectangle drillMachine;
+    private DrillMachine drillMachine;
     private Text fuelText;
     private Text collectedMoneyText;
     private Text weightText;
     private Stage stage;
     private Boolean gameOver = false;
     private Pane pane;
+    private Boolean isFlying = false;
 
     @Override
     public void start(Stage primaryStage) {
@@ -65,12 +67,7 @@ public class Main extends Application{
                 timeline.stop();
             }
             gravityFall();
-            fuel -= idleFuelConsumption;
-            updateTexts();
-            if (fuel <= 0) {
-                InfoScreens.showGreenScreen(primaryStage, SCREEN_LENGTH, SCREEN_WIDTH, collectedMoney);
-                timeline.stop();
-            }
+            useFuel(idleFuelConsumption);
         });
         timeline.getKeyFrames().add(keyFrame);
         timeline.setCycleCount(Timeline.INDEFINITE);
@@ -89,46 +86,81 @@ public class Main extends Application{
     }
 
     private void processMove(KeyEvent event){
-        int x = drillX;
-        int y = drillY;
         if (event.getCode() == KeyCode.UP) fly();
-        else if (event.getCode() == KeyCode.DOWN) drill(x, y+1);
-        // else if (event.getCode() == KeyCode.LEFT) drill(x-1, y);
-        // else if (event.getCode() == KeyCode.RIGHT) drill(x+1, y);
+        else if (event.getCode() == KeyCode.DOWN) move(drillX, drillY+1);
+        else if (event.getCode() == KeyCode.LEFT) {
+            drillMachine.lookLeft();
+            move(drillX-1, drillY);
+        }
+        else if (event.getCode() == KeyCode.RIGHT){
+            drillMachine.lookRight();
+            move(drillX+1, drillY);
+        }
     }
 
-    private void drill(int x, int y){
-        Rectangle floor = gridBlocks[drillX][drillY];
-        if (floor instanceof DrilledBlock) {
+    private void move(int x, int y){
+        if (x < 0 || x >= COLUMN_COUNT || y < 0 || y >= ROW_COUNT) {
             return;
         }
+
+        Rectangle floor = gridBlocks[drillX][drillY+1];
         Rectangle block = gridBlocks[x][y];
+
+        isFlying = false;
+
+        if (floor instanceof DrilledBlock) {
+            if (block instanceof DrilledBlock || block instanceof SkyBlock) {
+                updateDrillPosition(x, y);
+                drillMachine.idle();
+            }
+            return;
+        }
+
         if (block instanceof ObstacleBlock) {
             return;
         } else if (block instanceof LavaBlock) {
             InfoScreens.showRedScreen(stage, SCREEN_LENGTH, SCREEN_WIDTH);
             gameOver = true;
             return;
-        // } else if (block instanceof ValuableBlock || block instanceof SoilBlock || block instanceof SkyBlock || block instanceof TopBlock) {
         } else{
-            ValuableBlock valuableBlock = (ValuableBlock) block;
-            collectedMoney += valuableBlock.getWorth();
-            weight += valuableBlock.getWeight();
+            if(drillY < y || (block instanceof SkyBlock) || (block instanceof DrilledBlock)){
+                drillMachine.idle();
+            }else{
+                drillMachine.drill();
+            }
+            if(block instanceof ValuableBlock){
+                ValuableBlock valuableBlock = (ValuableBlock) block;
+                collectedMoney += valuableBlock.getWorth();
+                weight += valuableBlock.getWeight();
+            }
+            updateDrillPosition(x, y);
+            if(block instanceof SkyBlock) {
+                return;
+            }
             pane.getChildren().remove(block);
-
             Rectangle drilledBlock = GameBlockManager.getDrilledBlock(x, y);
             gridBlocks[x][y] = drilledBlock;
             pane.getChildren().add(drilledBlock);
+            drilledBlock.toBack();
             updateTexts();
-            updateDrillPosition(x, y);
         }
     }
 
     private void updateDrillPosition(int x, int y){
+        useFuel(moveFuelConsumption);
         drillX = x;
         drillY = y;
         drillMachine.setX(drillX * BLOCK_SIZE);
         drillMachine.setY(drillY * BLOCK_SIZE);
+    }
+
+    private void useFuel(int amount){
+        fuel -= amount;
+        if(fuel <= 0){
+            gameOver = true;
+            InfoScreens.showGreenScreen(stage, SCREEN_LENGTH, SCREEN_WIDTH, collectedMoney);
+        }
+        updateTexts();
     }
 
     private void updateTexts(){
@@ -143,19 +175,22 @@ public class Main extends Application{
         }
         Rectangle block = gridBlocks[drillX][drillY - 1];
         if (block instanceof DrilledBlock || block instanceof SkyBlock) {
-            drillY--;
-            drillMachine.setY(drillY * BLOCK_SIZE);
+            isFlying = true;
+            drillMachine.fly();
+            updateDrillPosition(drillX, drillY - 1);
         }
     }
 
     private void gravityFall(){
+        if (isFlying) {
+            return;
+        }
         if (drillY == ROW_COUNT - 1) {
             return;
         }
         Rectangle block = gridBlocks[drillX][drillY + 1];
         if (block instanceof DrilledBlock) {
-            drillY++;
-            drillMachine.setY(drillY * BLOCK_SIZE);
+            updateDrillPosition(drillX, drillY + 1);
         }
     }
 

@@ -40,6 +40,14 @@ public class Paths {
     static final String LAVA_BLOCK_3 = "file:./assets/underground/lava_03.png";
     static final String[] lavaBlockPaths = {LAVA_BLOCK_1, LAVA_BLOCK_2, LAVA_BLOCK_3};
 
+    // Drill paths
+    static final String IDLE_LEFT = "file:./assets/drill/drill_38.png";
+    static final String IDLE_RIGHT = "file:./assets/drill/drill_right/38.png";
+    static final String DRILL_LEFT = "file:./assets/drill/drill_01.png";
+    static final String DRILL_RIGHT = "file:./assets/drill/drill_right/01.png";
+    static final String FLY_LEFT = "file:./assets/drill/drill_30.png";
+    static final String FLY_RIGHT = "file:./assets/drill/drill_right/30.png";
+
     private static String chooseRandomly(String[] paths){
         int length = paths.length;
         int random = (int) (Math.random() * length);
