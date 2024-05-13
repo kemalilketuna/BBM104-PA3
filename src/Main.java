@@ -31,7 +31,7 @@ public class Main extends Application{
     
     private int drillX = COLUMN_COUNT / 2;
     private int drillY = 1;
-    private int fuel = 10;
+    private int fuel = 1000;
     private int collectedMoney = 0;
     private int weight = 0;
 
@@ -41,27 +41,34 @@ public class Main extends Application{
     private Text fuelText;
     private Text collectedMoneyText;
     private Text weightText;
+    private Stage stage;
+    private Boolean gameOver = false;
+    private Pane pane;
 
     @Override
     public void start(Stage primaryStage) {
-        Pane pane = new Pane();
+        stage = primaryStage;
+        pane = new Pane();
 
         pane.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, null, null)));
         pane.setPrefSize(SCREEN_WIDTH, SCREEN_LENGTH);
         
         GameBlockManager.setBlockAttributes(BLOCK_SIZE, valuableBlockAttributes);
-        levelBuilder(pane);
-        initializeDrillMachine(pane);
-        initializeTexts(pane);
+        levelBuilder();
+        initializeDrillMachine();
+        initializeTexts();
 
         // Create a Timeline
         Timeline timeline = new Timeline();
-        KeyFrame keyFrame = new KeyFrame(Duration.seconds(1), event -> {
+        KeyFrame keyFrame = new KeyFrame(Duration.seconds(0.5), event -> {
+            if (gameOver) {
+                timeline.stop();
+            }
             gravityFall();
             fuel -= idleFuelConsumption;
             updateTexts();
             if (fuel <= 0) {
-                InfoScreens.showGreenScreen(primaryStage, pane, collectedMoney);
+                InfoScreens.showGreenScreen(primaryStage, SCREEN_LENGTH, SCREEN_WIDTH, collectedMoney);
                 timeline.stop();
             }
         });
@@ -82,16 +89,46 @@ public class Main extends Application{
     }
 
     private void processMove(KeyEvent event){
-        if (event.getCode() == KeyCode.UP && drillY > 0) fly();
-        else if (event.getCode() == KeyCode.DOWN && drillY < ROW_COUNT - 1) drillY++;
-        else if (event.getCode() == KeyCode.LEFT && drillX > 0) drillX--;
-        else if (event.getCode() == KeyCode.RIGHT && drillX < COLUMN_COUNT - 1) drillX++;
-        drillMachine.setX(drillX * BLOCK_SIZE);
-        drillMachine.setY(drillY * BLOCK_SIZE);
+        int x = drillX;
+        int y = drillY;
+        if (event.getCode() == KeyCode.UP) fly();
+        else if (event.getCode() == KeyCode.DOWN) drill(x, y+1);
+        // else if (event.getCode() == KeyCode.LEFT) drill(x-1, y);
+        // else if (event.getCode() == KeyCode.RIGHT) drill(x+1, y);
     }
 
-    private void drill(){
+    private void drill(int x, int y){
+        Rectangle floor = gridBlocks[drillX][drillY];
+        if (floor instanceof DrilledBlock) {
+            return;
+        }
+        Rectangle block = gridBlocks[x][y];
+        if (block instanceof ObstacleBlock) {
+            return;
+        } else if (block instanceof LavaBlock) {
+            InfoScreens.showRedScreen(stage, SCREEN_LENGTH, SCREEN_WIDTH);
+            gameOver = true;
+            return;
+        // } else if (block instanceof ValuableBlock || block instanceof SoilBlock || block instanceof SkyBlock || block instanceof TopBlock) {
+        } else{
+            ValuableBlock valuableBlock = (ValuableBlock) block;
+            collectedMoney += valuableBlock.getWorth();
+            weight += valuableBlock.getWeight();
+            pane.getChildren().remove(block);
 
+            Rectangle drilledBlock = GameBlockManager.getDrilledBlock(x, y);
+            gridBlocks[x][y] = drilledBlock;
+            pane.getChildren().add(drilledBlock);
+            updateTexts();
+            updateDrillPosition(x, y);
+        }
+    }
+
+    private void updateDrillPosition(int x, int y){
+        drillX = x;
+        drillY = y;
+        drillMachine.setX(drillX * BLOCK_SIZE);
+        drillMachine.setY(drillY * BLOCK_SIZE);
     }
 
     private void updateTexts(){
@@ -122,12 +159,12 @@ public class Main extends Application{
         }
     }
 
-    private void initializeDrillMachine(Pane pane){
+    private void initializeDrillMachine(){
         drillMachine = new DrillMachine(drillX, drillY, BLOCK_SIZE);
         pane.getChildren().add(drillMachine);
     }
 
-    private void initializeTexts(Pane pane){
+    private void initializeTexts(){
         fuelText = new TextElement(TextCaptions.getFuelString(fuel), 20, 20);
         pane.getChildren().add(fuelText);
 
@@ -150,7 +187,7 @@ public class Main extends Application{
         return new int[]{x, y};
     }
 
-    private void levelBuilder(Pane pane) {
+    private void levelBuilder() {
         int lava_count = (int) (Math.random() * COLUMN_COUNT) + 1;
         
         // Initialize lava blocks

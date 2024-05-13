@@ -1,7 +1,6 @@
 import javafx.application.Platform;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -13,9 +12,7 @@ import javafx.scene.control.Button;
 
 
 public class InfoScreens {
-    public static void showRedScreen(Stage primaryStage, Pane pane) {
-        int height = (int) pane.getHeight();
-
+    public static void showRedScreen(Stage primaryStage, int height, int width) {
         StackPane root = new StackPane();
         root.setBackground(new Background(new BackgroundFill(Color.RED, null, null)));
         Text text = new Text(TextCaptions.GAME_OVER);
@@ -33,13 +30,11 @@ public class InfoScreens {
         restartButton.setTranslateY(height / 6);
         root.getChildren().add(restartButton);
 
-        Scene scene = new Scene(root, pane.getWidth(), pane.getHeight());
+        Scene scene = new Scene(root, width, height);
         primaryStage.setScene(scene);
     }
 
-    public static void showGreenScreen(Stage primaryStage, Pane pane, int score) {
-        int height = (int) pane.getHeight();
-
+    public static void showGreenScreen(Stage primaryStage, int height, int width, int score) {
         StackPane root = new StackPane();
         root.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, null, null)));
         Text text = new Text(TextCaptions.WIN);
@@ -62,7 +57,7 @@ public class InfoScreens {
         restartButton.setTranslateY(height / 6);
         root.getChildren().add(restartButton);
 
-        Scene scene = new Scene(root, pane.getWidth(), pane.getHeight());
+        Scene scene = new Scene(root, width, height);
         primaryStage.setScene(scene);
     }
 
