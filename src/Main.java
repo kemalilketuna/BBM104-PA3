@@ -1,6 +1,5 @@
 import java.io.*;
 import java.util.HashMap;
-
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.layout.Background;
@@ -17,7 +16,7 @@ import javafx.animation.Timeline;
 import javafx.util.Duration;
 
 public class Main extends Application{
-    // TODO: this variable can be changed
+    // This variable can be changed if game is too easy or too hard
     private final int COLUMN_COUNT = 13;
     private final int ROW_COUNT = 10;
     private final int BLOCK_SIZE = 50;
@@ -127,6 +126,7 @@ public class Main extends Application{
                 drillMachine.idle();
             }else{
                 drillMachine.drill();
+                SoundPlayer.playDrillSound();
             }
             if(block instanceof ValuableBlock){
                 ValuableBlock valuableBlock = (ValuableBlock) block;

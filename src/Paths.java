@@ -48,6 +48,12 @@ public class Paths {
     static final String FLY_LEFT = "file:./assets/drill/drill_30.png";
     static final String FLY_RIGHT = "file:./assets/drill/drill_right/30.png";
 
+    // Sound paths
+    public static final String DRILL_SOUND = "./assets/extras/sound/pod_drill2.mp3";
+    public static final String LAVA_SOUND = "./assets/extras/sound/lava.mp3";
+    public static final String CHALLENGE_DONE = "./assets/extras/sound/challenge_complete.wav";
+    public static final String CLICK = "./assets/extras/sound/clink.mp3";
+
     private static String chooseRandomly(String[] paths){
         int length = paths.length;
         int random = (int) (Math.random() * length);

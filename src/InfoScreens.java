@@ -10,9 +10,9 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 
-
 public class InfoScreens {
     public static void showRedScreen(Stage primaryStage, int height, int width) {
+        SoundPlayer.playLavaSound();
         StackPane root = new StackPane();
         root.setBackground(new Background(new BackgroundFill(Color.RED, null, null)));
         Text text = new Text(TextCaptions.GAME_OVER);
@@ -22,11 +22,8 @@ public class InfoScreens {
         root.getChildren().add(text);
 
         // Restart button
-        Button restartButton = createRestartButton();
-        restartButton.setOnAction(event -> {
-            primaryStage.close();
-            Platform.runLater(() -> new Main().start(new Stage()));
-        });
+        Button restartButton = createRestartButton(primaryStage);
+
         restartButton.setTranslateY(height / 6);
         root.getChildren().add(restartButton);
 
@@ -35,6 +32,7 @@ public class InfoScreens {
     }
 
     public static void showGreenScreen(Stage primaryStage, int height, int width, int score) {
+        SoundPlayer.playChallengeDoneSound();
         StackPane root = new StackPane();
         root.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, null, null)));
         Text text = new Text(TextCaptions.WIN);
@@ -49,11 +47,8 @@ public class InfoScreens {
         root.getChildren().add(scoreText);
 
         // Restart button
-        Button restartButton = createRestartButton();
-        restartButton.setOnAction(event -> {
-            primaryStage.close();
-            Platform.runLater(() -> new Main().start(new Stage()));
-        });
+        Button restartButton = createRestartButton(primaryStage);
+
         restartButton.setTranslateY(height / 6);
         root.getChildren().add(restartButton);
 
@@ -61,13 +56,19 @@ public class InfoScreens {
         primaryStage.setScene(scene);
     }
 
-    public static Button createRestartButton() {
+    public static Button createRestartButton(Stage primaryStage) {
         Button restartButton = new Button(TextCaptions.RESTART);
         // background color of the button Color.white
         restartButton.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
         // larger button size
         restartButton.setPrefSize(200, 50);
         restartButton.setFont(Font.font("Verdana", FontWeight.BOLD, 20));
+        restartButton.setOnAction(event -> {
+            SoundPlayer.playClickSound();
+            primaryStage.close();
+            Platform.runLater(() -> new Main().start(new Stage()));
+        });
         return restartButton;
+
     }
 }
