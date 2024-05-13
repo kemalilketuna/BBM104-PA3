@@ -31,9 +31,11 @@ public class Main extends Application{
     
     private int drillX = COLUMN_COUNT / 2;
     private int drillY = 1;
-    private int fuel = 100;
+    private int fuel = 10;
     private int collectedMoney = 0;
     private int weight = 0;
+
+    private int idleFuelConsumption = 1;
 
     private Rectangle drillMachine;
     private Text fuelText;
@@ -53,9 +55,17 @@ public class Main extends Application{
         initializeTexts(pane);
 
         // Create a Timeline
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.5), event -> {
+        Timeline timeline = new Timeline();
+        KeyFrame keyFrame = new KeyFrame(Duration.seconds(1), event -> {
             gravityFall();
-        }));
+            fuel -= idleFuelConsumption;
+            updateTexts();
+            if (fuel <= 0) {
+                InfoScreens.showGreenScreen(primaryStage, pane, collectedMoney);
+                timeline.stop();
+            }
+        });
+        timeline.getKeyFrames().add(keyFrame);
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
 
@@ -82,6 +92,12 @@ public class Main extends Application{
 
     private void drill(){
 
+    }
+
+    private void updateTexts(){
+        fuelText.setText(TextCaptions.getFuelString(fuel));
+        collectedMoneyText.setText(TextCaptions.getCollectedMoneyString(collectedMoney));
+        weightText.setText(TextCaptions.getWeightString(weight));
     }
 
     private void fly(){
@@ -135,7 +151,7 @@ public class Main extends Application{
     }
 
     private void levelBuilder(Pane pane) {
-        int lava_count = (int) (Math.random() * COLUMN_COUNT / 2) + 1;
+        int lava_count = (int) (Math.random() * COLUMN_COUNT) + 1;
         
         // Initialize lava blocks
         for (int i = 0; i < lava_count; i++) {
