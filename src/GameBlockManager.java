@@ -34,7 +34,7 @@ class SkyBlock extends GameBlock {
 class DrilledBlock extends GameBlock {
     DrilledBlock(int x, int y, int size) {
         super(x, y, size, 0, 0);
-        setFill(Color.LIGHTGREY);
+        setFill(Color.rgb(73, 27, 29));
     }
 }
 

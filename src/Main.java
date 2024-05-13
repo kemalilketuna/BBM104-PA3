@@ -7,58 +7,135 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 
 public class Main extends Application{
     // TODO: this variable can be changed
-    private static final int COLUMN_COUNT = 13;
-    private static final int ROW_COUNT = 10;
-    private static final int BLOCK_SIZE = 50;
-    private static final int SCREEN_WIDTH = BLOCK_SIZE * COLUMN_COUNT;
-    private static final int SCREEN_LENGTH = BLOCK_SIZE * ROW_COUNT;
-    private static final float VALUABLE_BLOCK_PROBABILITY = 0.15f;
+    private final int COLUMN_COUNT = 13;
+    private final int ROW_COUNT = 10;
+    private final int BLOCK_SIZE = 50;
+    private final int SCREEN_WIDTH = BLOCK_SIZE * COLUMN_COUNT;
+    private final int SCREEN_LENGTH = BLOCK_SIZE * ROW_COUNT;
+    private final float VALUABLE_BLOCK_PROBABILITY = 0.15f;
+    private final int skyRowCount = ROW_COUNT * 2 / 10;
 
     private final Rectangle[][] gridBlocks = new Rectangle[COLUMN_COUNT][ROW_COUNT];
+    private final static HashMap <String, Integer[]> valuableBlockAttributes = new HashMap<>();
+    
+    private int drillX = COLUMN_COUNT / 2;
+    private int drillY = 1;
+    private int fuel = 100;
+    private int collectedMoney = 0;
+    private int weight = 0;
 
-    private static HashMap <String, Integer[]> valuableBlockAttributes = new HashMap<>();
+    private Rectangle drillMachine;
+    private Text fuelText;
+    private Text collectedMoneyText;
+    private Text weightText;
 
     @Override
     public void start(Stage primaryStage) {
         Pane pane = new Pane();
-        BackgroundFill backgroundFill = new BackgroundFill(Color.LIGHTBLUE, null, null);
-        Background background = new Background(backgroundFill);
-        pane.setBackground(background);
-        
-        GameBlockManager.setBlockAttributes(BLOCK_SIZE, valuableBlockAttributes);
+
+        pane.setBackground(new Background(new BackgroundFill(Color.LIGHTBLUE, null, null)));
         pane.setPrefSize(SCREEN_WIDTH, SCREEN_LENGTH);
         
+        GameBlockManager.setBlockAttributes(BLOCK_SIZE, valuableBlockAttributes);
         levelBuilder(pane);
+        initializeDrillMachine(pane);
+        initializeTexts(pane);
+
+        // Create a Timeline
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.5), event -> {
+            gravityFall();
+        }));
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
 
         Scene scene = new Scene(pane, SCREEN_WIDTH, SCREEN_LENGTH);
+        scene.setOnKeyPressed(event -> {
+            processMove(event);
+        });
 
-        primaryStage.setTitle(Texts.GAME_TITLE);
+        // Properties of the stage
+        primaryStage.setTitle(TextCaptions.GAME_TITLE);
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
     }
 
+    private void processMove(KeyEvent event){
+        if (event.getCode() == KeyCode.UP && drillY > 0) fly();
+        else if (event.getCode() == KeyCode.DOWN && drillY < ROW_COUNT - 1) drillY++;
+        else if (event.getCode() == KeyCode.LEFT && drillX > 0) drillX--;
+        else if (event.getCode() == KeyCode.RIGHT && drillX < COLUMN_COUNT - 1) drillX++;
+        drillMachine.setX(drillX * BLOCK_SIZE);
+        drillMachine.setY(drillY * BLOCK_SIZE);
+    }
+
+    private void drill(){
+
+    }
+
+    private void fly(){
+        if(drillY <= skyRowCount - 1){
+            return;
+        }
+        Rectangle block = gridBlocks[drillX][drillY - 1];
+        if (block instanceof DrilledBlock || block instanceof SkyBlock) {
+            drillY--;
+            drillMachine.setY(drillY * BLOCK_SIZE);
+        }
+    }
+
+    private void gravityFall(){
+        if (drillY == ROW_COUNT - 1) {
+            return;
+        }
+        Rectangle block = gridBlocks[drillX][drillY + 1];
+        if (block instanceof DrilledBlock) {
+            drillY++;
+            drillMachine.setY(drillY * BLOCK_SIZE);
+        }
+    }
+
+    private void initializeDrillMachine(Pane pane){
+        drillMachine = new DrillMachine(drillX, drillY, BLOCK_SIZE);
+        pane.getChildren().add(drillMachine);
+    }
+
+    private void initializeTexts(Pane pane){
+        fuelText = new TextElement(TextCaptions.getFuelString(fuel), 20, 20);
+        pane.getChildren().add(fuelText);
+
+        collectedMoneyText = new TextElement(TextCaptions.getCollectedMoneyString(collectedMoney), 20, BLOCK_SIZE/2 + 20);
+        pane.getChildren().add(collectedMoneyText);
+
+        weightText = new TextElement(TextCaptions.getWeightString(weight), 20, BLOCK_SIZE + 20);
+        pane.getChildren().add(weightText);
+    }
+
     private int[] getRandomXY(){
         int x = (int) ((Math.random() * (COLUMN_COUNT - 2)) + 1);
-        int y = (int) ((Math.random() * (ROW_COUNT - 3)) + 3);
+        int y = (int) ((Math.random() * (ROW_COUNT - (skyRowCount + 2))) + 3);
 
         // if the block is already occupied, try again
         while (gridBlocks[x][y] != null) {
             x = (int) ((Math.random() * (COLUMN_COUNT - 2)) + 1);
-            y = (int) ((Math.random() * (ROW_COUNT - 3)) + 3);
+            y = (int) ((Math.random() * (ROW_COUNT - (skyRowCount + 2))) + 3);
         }
         return new int[]{x, y};
     }
 
     private void levelBuilder(Pane pane) {
-        final int skyRowCount = ROW_COUNT * 2 / 10;
-        final int topRowNumber = skyRowCount;
-        final int lava_count = (int) (Math.random() * COLUMN_COUNT / 2) + 1;
+        int lava_count = (int) (Math.random() * COLUMN_COUNT / 2) + 1;
         
         // Initialize lava blocks
         for (int i = 0; i < lava_count; i++) {
@@ -89,9 +166,12 @@ public class Main extends Application{
                 Rectangle block;
                 if(i < skyRowCount){
                     block = GameBlockManager.getSkyBlock(j, i);
-                } else if (i == topRowNumber){
+                } else if (i == skyRowCount){
                     block = GameBlockManager.getTopBlock(j, i);
-                } else if (i > topRowNumber && (j == 0 || j == COLUMN_COUNT - 1)){
+                } else if (i == ROW_COUNT - 1){
+                    block = GameBlockManager.getObstacleBlock(j, i);
+                }
+                else if (i > skyRowCount && (j == 0 || j == COLUMN_COUNT - 1)){
                     block = GameBlockManager.getObstacleBlock(j, i);
                 }else {
                     if(Math.random() < VALUABLE_BLOCK_PROBABILITY){
